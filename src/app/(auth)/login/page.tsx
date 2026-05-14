@@ -16,20 +16,23 @@ export default function LoginPage() {
     e.preventDefault()
     setLoading(true)
 
-    const { createClient } = await import('@/lib/supabase/client')
-    const supabase = createClient()
-
     const formData = new FormData(e.currentTarget)
     const email = formData.get('email') as string
     const password = formData.get('password') as string
 
+    const { createClient } = await import('@/lib/supabase/client')
+    const supabase = createClient()
+
     const { error } = await supabase.auth.signInWithPassword({ email, password })
 
     if (error) {
-      toast.error(error.message === 'Invalid login credentials'
-        ? 'E-mail ou senha incorretos'
-        : error.message
-      )
+      const msg =
+        error.message === 'Invalid login credentials'
+          ? 'E-mail ou senha incorretos.'
+          : error.message === 'Email not confirmed'
+            ? 'E-mail ainda não confirmado. Verifique sua caixa de entrada e clique no link que enviamos.'
+            : error.message
+      toast.error(msg)
       setLoading(false)
       return
     }
